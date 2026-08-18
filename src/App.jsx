@@ -13,7 +13,7 @@ const Contact = lazy(() => import('./pages/Contact.jsx'));
 const NotFound = lazy(() => import('./pages/NotFound.jsx'));
 
 /* Holds the page height while a route chunk loads, so the footer does not
-   jump up the screen. */
+   jump up the screen. new*/
 function RouteFallback() {
   return <div className="min-h-[60vh]" aria-busy="true" />;
 }
