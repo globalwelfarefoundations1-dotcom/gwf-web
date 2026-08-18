@@ -15,8 +15,11 @@ export const mandate = {
   eyebrow: 'Our mandate',
   title: 'The promise came first. The work follows.',
   paragraphs: [
-    'Global Welfare Foundation began in 2026. Before a single programme was designed, its purpose was written into its constitution — the object clause below is the legal instrument that binds everything we do.',
-    'A Section 8 company cannot distribute profit. Every rupee it earns or receives goes back into the objects it was formed for. That is not a policy we adopted; it is the condition of our existence.',
+
+    "Global Welfare Foundation. Before a single programme was designed, its purpose was written into its constitution — the object clause below is the legal instrument that binds everything we do.",
+
+    "A Section 8 company cannot distribute profit. Every rupee it earns or receives goes back into the objects it was formed for. That is not a policy we adopted; it is the condition of our existence.",
+
   ],
   link: { label: 'Read about the foundation', to: '/about' },
   documentLabel: 'Object clause',
