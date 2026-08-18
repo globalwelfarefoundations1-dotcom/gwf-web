@@ -11,6 +11,8 @@ const WhatWeDo = lazy(() => import('./pages/WhatWeDo.jsx'));
 const GetInvolved = lazy(() => import('./pages/GetInvolved.jsx'));
 const Contact = lazy(() => import('./pages/Contact.jsx'));
 const NotFound = lazy(() => import('./pages/NotFound.jsx'));
+const Projects = lazy(() => import('./pages/projects/ProjectsPage.jsx'));
+const Upcoming = lazy(() => import('./components/ui/EmptyState.jsx'));
 
 /* Holds the page height while a route chunk loads, so the footer does not
    jump up the screen. */
@@ -27,7 +29,8 @@ export default function App() {
           path="about"
           element={
             <Suspense fallback={<RouteFallback />}>
-              <About />
+              {/* <About /> */}
+              <Upcoming/>
             </Suspense>
           }
         />
@@ -35,7 +38,8 @@ export default function App() {
           path="what-we-do"
           element={
             <Suspense fallback={<RouteFallback />}>
-              <WhatWeDo />
+              {/* <WhatWeDo /> */}
+              <Upcoming/>
             </Suspense>
           }
         />
@@ -43,7 +47,8 @@ export default function App() {
           path="get-involved"
           element={
             <Suspense fallback={<RouteFallback />}>
-              <GetInvolved />
+              {/* <GetInvolved /> */}
+              <Upcoming/>
             </Suspense>
           }
         />
@@ -51,7 +56,8 @@ export default function App() {
           path="contact"
           element={
             <Suspense fallback={<RouteFallback />}>
-              <Contact />
+              {/* <Contact /> */}
+              <Upcoming/>
             </Suspense>
           }
         />
@@ -59,7 +65,8 @@ export default function App() {
           path="projects"
           element={
             <Suspense fallback={<RouteFallback />}>
-              <ProjectsPage />
+              {/* <Projects /> */}
+              <Upcoming/>
             </Suspense>
           }
         />
