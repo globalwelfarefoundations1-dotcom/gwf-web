@@ -76,7 +76,7 @@ export const approach = [
 export const waysIntro = {
   eyebrow: 'Get involved',
   title: 'Three ways to be part of this.',
-  standfirst: 'The foundation is new. What it becomes depends on who joins it now.',
+  standfirst: 'The foundation is working for last 20 years without registration.',
 };
 
 export const ways = [
