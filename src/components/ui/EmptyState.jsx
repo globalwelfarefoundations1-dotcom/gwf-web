@@ -1,8 +1,8 @@
 import { FolderIcon ,ClockIcon} from "../../components/icons/Icons";
 
 export default function EmptyState({
-  title = "Upcoming soon...",
-  description = "There is nothing to display at the moment. Please check back later.",
+  title = "Under Maintenance",
+  description = "This feature is currently under maintenance. Please check back soon.",
 }) {
   return (
     <div className="guilloche relative flex min-h-[280px] w-full flex-col items-center justify-center overflow-hidden border border-dashed border-gold-deep/30 bg-parchment px-5 py-14 text-center sm:min-h-[320px] sm:px-8 sm:py-16 lg:min-h-[360px]">
