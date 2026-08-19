@@ -8,7 +8,7 @@ import {
   GlobeIcon,
 } from "../../components/icons/Icons";
 import Lightbox from "./Lightbox";
-import { useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 
 function formatDate(d) {
   if (!d) return "Not specified";
@@ -28,7 +28,6 @@ export default function ViewProjectModal({ project, onClose }) {
   const [lightbox, setLightbox] = useState(null);
   const closeBtnRef = useRef(null);
   const [playingVideo, setPlayingVideo] = useState(null);
-  const navigate = useNavigate();
 
   useEffect(() => {
     closeBtnRef.current?.focus({ preventScroll: true });
@@ -71,21 +70,11 @@ export default function ViewProjectModal({ project, onClose }) {
             HERO MEDIA
         ============================================================ */}
         <div className="relative max-h-[34dvh] flex-none bg-ink sm:max-h-[38dvh] aspect-[16/10] sm:aspect-[16/8]">
-          {/* {hasVideos ? (
-            <video
-              src={project.videos[0]}
-              controls
-              playsInline
-              poster={project.cover}
-              className="h-full w-full object-cover"
-            />
-          ) : ( */}
-            <img
-              src={project.cover}
-              alt={project.name}
-              className="h-full w-full object-cover"
-            />
-          {/* )} */}
+          <img
+            src={project.cover}
+            alt={project.name}
+            className="h-full w-full object-cover"
+          />
 
           {/* Dark overlay */}
           <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-ink/95 via-ink/10 to-transparent" />
@@ -293,13 +282,12 @@ export default function ViewProjectModal({ project, onClose }) {
                       replicate this initiative in your district.
                     </p>
 
-                    <a
-                      // href="contact.html"
-                      onClick={()=>navigate('/contact')}
-                      className="block rounded-full cursor-pointer bg-gold py-2.5 text-center text-[11px] font-bold uppercase tracking-wider text-gold-onblack shadow-[0_10px_22px_-10px_rgba(198,160,62,0.55)] transition-colors hover:bg-gold-light"
+                    <Link
+                      to="/contact"
+                      className="block rounded-full bg-gold py-2.5 text-center text-[11px] font-bold uppercase tracking-wider text-gold-onblack shadow-[0_10px_22px_-10px_rgba(198,160,62,0.55)] transition-colors hover:bg-gold-light"
                     >
                       Talk to our team
-                    </a>
+                    </Link>
                   </div>
                 </div>
               </div>

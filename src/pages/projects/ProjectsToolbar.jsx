@@ -23,7 +23,7 @@ export default function ProjectsToolbar({
         <SearchIcon className="h-[18px] w-[18px] flex-none text-ink-text/50" />
 
         <label htmlFor="project-search" className="sr-only">
-          Search projectsss
+          Search projects
         </label>
 
         <input

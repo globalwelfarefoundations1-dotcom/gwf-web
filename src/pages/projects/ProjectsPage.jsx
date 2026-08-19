@@ -4,14 +4,13 @@ import ProjectsToolbar from "./ProjectsToolbar";
 import ProjectCard from "./ProjectCard";
 import ViewProjectModal from "./ViewProjectModal";
 import { FolderIcon } from "../../components/icons/Icons";
-import { useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 
 export default function ProjectsPage() {
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("all");
   const [status, setStatus] = useState("all");
   const [viewingId, setViewingId] = useState(null);
-  const navigate = useNavigate();
 
   // Swap MOCK_PROJECTS for real data from an API call once the backend exists.
   const projects = MOCK_PROJECTS;
@@ -195,21 +194,19 @@ export default function ProjectsPage() {
           </div>
 
           <div className="flex flex-col gap-3 !items-center">
-            <a
-              // href="get-involved.html#donate"
-              onClick={() => navigate('/get-involved')}
-              className="w-full cursor-pointer rounded-full bg-gold px-6 py-3.5 text-center text-[14px] font-bold uppercase tracking-wider text-gold-onblack shadow-[0_10px_22px_-10px_rgba(198,160,62,0.55)] transition-all hover:bg-gold-light active:translate-y-px"
+            <Link
+              to="/get-involved"
+              className="w-full rounded-full bg-gold px-6 py-3.5 text-center text-[14px] font-bold uppercase tracking-wider text-gold-onblack shadow-[0_10px_22px_-10px_rgba(198,160,62,0.55)] transition-all hover:bg-gold-light active:translate-y-px"
             >
               Fund a project
-            </a>
+            </Link>
 
-            <a
-              // href=""
-              onClick={() => navigate('/contact')}
-              className="w-full cursor-pointer rounded-full border border-gold/50 px-6 py-3.5 text-center text-[14px] font-bold uppercase tracking-wider text-ivory transition-colors hover:border-gold hover:text-gold-light"
+            <Link
+              to="/contact"
+              className="w-full rounded-full border border-gold/50 px-6 py-3.5 text-center text-[14px] font-bold uppercase tracking-wider text-ivory transition-colors hover:border-gold hover:text-gold-light"
             >
               Talk to our programmes team
-            </a>
+            </Link>
 
             <span className="font-mono text-center text-[9px] tracking-wide text-ivory/50 sm:text-left">
               80G receipt issued within 48 hours
