@@ -9,6 +9,8 @@ import {
 } from "../../components/icons/Icons";
 import Lightbox from "./Lightbox";
 import { Link } from "react-router-dom";
+import { getProjectById } from "../../services/projects.js";
+import { normalizeProject } from "../../utils/normalizeProject.js";
 
 function formatDate(d) {
   if (!d) return "Not specified";
@@ -24,10 +26,14 @@ function formatDate(d) {
   });
 }
 
-export default function ViewProjectModal({ project, onClose }) {
+export default function ViewProjectModal({ projectId, onClose }) {
   const [lightbox, setLightbox] = useState(null);
   const closeBtnRef = useRef(null);
   const [playingVideo, setPlayingVideo] = useState(null);
+
+  const [project, setProject] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     closeBtnRef.current?.focus({ preventScroll: true });
@@ -48,10 +54,31 @@ export default function ViewProjectModal({ project, onClose }) {
     };
   }, [onClose, lightbox]);
 
-  if (!project) return null;
+  useEffect(() => {
+    let cancelled = false;
+    setLoading(true);
+    setError(null);
 
-  const hasPhotos = project.photos && project.photos.length > 0;
-  const hasVideos = project.videos && project.videos.length > 0;
+    getProjectById(projectId)
+      .then((res) => {
+        if (cancelled) return;
+        setProject(normalizeProject(res?.data ?? res));
+      })
+      .catch((err) => {
+        if (!cancelled) setError(err);
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [projectId]);
+
+  const hasPhotos = project?.photos && project.photos.length > 0;
+  const hasVideos = project?.videos && project.videos.length > 0;
+  const hasYoutubeLinks = project?.youtubeLinks && project.youtubeLinks.length > 0;
 
   return (
     <div
@@ -66,6 +93,52 @@ export default function ViewProjectModal({ project, onClose }) {
       aria-labelledby="view-project-title"
     >
       <div className="flex h-[100vh] w-full rounded-2xl flex-col overflow-hidden bg-[#FAF7EF] shadow-[0_30px_80px_rgba(4,18,11,0.35)] animate-modalIn sm:h-auto sm:max-h-[calc(100dvh-5rem)] sm:max-w-4xl">
+        {loading ? (
+          <div className="relative flex min-h-[320px] flex-1 flex-col items-center justify-center gap-4 p-8">
+            <button
+              ref={closeBtnRef}
+              type="button"
+              onClick={onClose}
+              aria-label="Close"
+              className="absolute right-3.5 top-3.5 flex h-10 w-10 items-center justify-center rounded-full border border-gold-deep/20 bg-white text-ink-text transition-colors hover:border-gold hover:text-gold-ink"
+            >
+              <XIcon className="h-[18px] w-[18px]" />
+            </button>
+
+            <div className="h-9 w-9 animate-spin rounded-full border-2 border-gold-deep/20 border-t-gold" />
+            <p className="text-sm text-ink-text/60">Loading project…</p>
+          </div>
+        ) : error || !project ? (
+          <div className="relative flex min-h-[320px] flex-1 flex-col items-center justify-center gap-4 p-8 text-center">
+            <button
+              ref={closeBtnRef}
+              type="button"
+              onClick={onClose}
+              aria-label="Close"
+              className="absolute right-3.5 top-3.5 flex h-10 w-10 items-center justify-center rounded-full border border-gold-deep/20 bg-white text-ink-text transition-colors hover:border-gold hover:text-gold-ink"
+            >
+              <XIcon className="h-[18px] w-[18px]" />
+            </button>
+
+            <h3 className="font-voice text-xl font-medium text-ink-text">
+              Could not load this project
+            </h3>
+
+            <p className="max-w-[40ch] text-sm text-ink-text/60">
+              Something went wrong fetching the details. Close this and try
+              again in a moment.
+            </p>
+
+            <button
+              type="button"
+              onClick={onClose}
+              className="rounded-full border border-gold-deep/25 bg-white px-5 py-2.5 text-[11px] font-bold uppercase tracking-wider text-ink-text transition-colors hover:border-gold hover:text-gold-ink"
+            >
+              Close
+            </button>
+          </div>
+        ) : (
+          <>
         {/* ============================================================
             HERO MEDIA
         ============================================================ */}
@@ -197,6 +270,30 @@ export default function ViewProjectModal({ project, onClose }) {
                     </div>
                   </>
                 )}
+
+                {/* YouTube links */}
+                {hasYoutubeLinks && (
+                  <>
+                    <h4 className="mb-3 font-voice text-[14px] font-medium text-ink-text">
+                      More on YouTube
+                    </h4>
+
+                    <ul className="mb-3 space-y-1.5">
+                      {project.youtubeLinks.map((link, i) => (
+                        <li key={link + i}>
+                          <a
+                            href={link.startsWith("http") ? link : `https://${link}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="break-all text-[13px] font-semibold text-gold-ink hover:text-gold-deep hover:underline"
+                          >
+                            {link} ↗
+                          </a>
+                        </li>
+                      ))}
+                    </ul>
+                  </>
+                )}
               </div>
 
               {/* RIGHT */}
@@ -307,10 +404,12 @@ export default function ViewProjectModal({ project, onClose }) {
             Close
           </button>
         </div>
+          </>
+        )}
       </div>
 
       {/* Lightbox */}
-      {lightbox && (
+      {lightbox && project && (
         <Lightbox
           images={project.photos}
           index={lightbox.index}

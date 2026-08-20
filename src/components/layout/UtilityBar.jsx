@@ -15,12 +15,13 @@ export function UtilityBar() {
           <a className="no-underline hover:text-gold-light" href={`tel:${contact.phoneHref}`}>
             {contact.phone}
           </a>
-          <a
+          {/* maybe use to feature */}
+          {/* <a
             className="no-underline hover:text-gold-light"
             href={`mailto:${contact.email.general}`}
           >
             {contact.email.general}
-          </a>
+          </a> */}
         </span>
       </Shell>
     </div>

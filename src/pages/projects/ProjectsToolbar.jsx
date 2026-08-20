@@ -65,8 +65,8 @@ export default function ProjectsToolbar({
           <option value="all">All focus areas</option>
 
           {categories.map((c) => (
-            <option key={c} value={c}>
-              {c}
+            <option key={c.id} value={c.id}>
+              {c.categoryName}
             </option>
           ))}
         </select>

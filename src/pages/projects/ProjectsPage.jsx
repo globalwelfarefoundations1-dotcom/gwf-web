@@ -1,57 +1,124 @@
-import { useMemo, useState } from "react";
-import { MOCK_PROJECTS, CATEGORIES } from "../../data/mockProjects";
+import { useCallback, useEffect, useState } from "react";
+import { getCategories, getProjects } from "../../services/projects.js";
+import { normalizeProject } from "../../utils/normalizeProject.js";
 import ProjectsToolbar from "./ProjectsToolbar";
 import ProjectCard from "./ProjectCard";
 import ViewProjectModal from "./ViewProjectModal";
+import Pagination from "./Pagination";
 import { FolderIcon } from "../../components/icons/Icons";
 import { Link } from "react-router-dom";
 
+const PAGE_SIZE = 6;
+const SEARCH_DEBOUNCE_MS = 400;
+
+/* The three statuses shown in the toolbar map onto the backend's enum;
+   "all" is a client-side-only value that omits the `status` param
+   entirely rather than sending it empty. */
+const STATUS_API_VALUE = {
+  published: "Published",
+  draft: "Draft",
+};
+
 export default function ProjectsPage() {
+  const [searchInput, setSearchInput] = useState("");
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("all");
   const [status, setStatus] = useState("all");
+  const [page, setPage] = useState(1);
   const [viewingId, setViewingId] = useState(null);
 
-  // Swap MOCK_PROJECTS for real data from an API call once the backend exists.
-  const projects = MOCK_PROJECTS;
+  const [categories, setCategories] = useState([]);
+  const [categoriesTotal, setCategoriesTotal] = useState(0);
 
-  const filtered = useMemo(() => {
-    const q = search.trim().toLowerCase();
+  const [projects, setProjects] = useState([]);
+  const [total, setTotal] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-    return projects.filter((p) => {
-      const matchesSearch =
-        !q ||
-        p.name.toLowerCase().includes(q) ||
-        (p.client || "").toLowerCase().includes(q) ||
-        (p.description || "").toLowerCase().includes(q);
+  const [publishedTotal, setPublishedTotal] = useState(0);
 
-      const matchesCategory =
-        category === "all" || p.category === category;
+  // Debounce the search box so every keystroke doesn't fire a request.
+  useEffect(() => {
+    const timer = setTimeout(() => setSearch(searchInput.trim()), SEARCH_DEBOUNCE_MS);
+    return () => clearTimeout(timer);
+  }, [searchInput]);
 
-      const matchesStatus =
-        status === "all" || p.status === status;
+  // A filter change invalidates the current page.
+  useEffect(() => {
+    setPage(1);
+  }, [search, category, status]);
 
-      return matchesSearch && matchesCategory && matchesStatus;
-    });
-  }, [projects, search, category, status]);
+  // Active categories for the filter dropdown, fetched once.
+  useEffect(() => {
+    let cancelled = false;
 
-  const stats = useMemo(
-    () => ({
-      total: projects.length,
-      published: projects.filter((p) => p.status === "published").length,
-      categories: new Set(projects.map((p) => p.category)).size,
-    }),
-    [projects]
-  );
+    getCategories({ status: "active" })
+      .then((res) => {
+        if (cancelled) return;
+        setCategories(res.data || []);
+        setCategoriesTotal(res.total ?? (res.data || []).length);
+      })
+      .catch(() => {
+        if (!cancelled) setCategories([]);
+      });
 
-  const viewingProject =
-    projects.find((p) => p.id === viewingId) || null;
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
-  const isFiltering =
-    !!search || category !== "all" || status !== "all";
+  // Portfolio-wide published count, independent of the current filters —
+  // matches the mock-data version, which always summed the full set.
+  useEffect(() => {
+    let cancelled = false;
+
+    getProjects({ limit: 1, status: "Published" })
+      .then((res) => {
+        if (!cancelled) setPublishedTotal(res.total ?? 0);
+      })
+      .catch(() => {});
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const loadProjects = useCallback(() => {
+    let cancelled = false;
+    setLoading(true);
+    setError(null);
+
+    getProjects({
+      offset: (page - 1) * PAGE_SIZE,
+      limit: PAGE_SIZE,
+      search: search || undefined,
+      status: STATUS_API_VALUE[status],
+      categoryId: category === "all" ? undefined : category,
+    })
+      .then((res) => {
+        if (cancelled) return;
+        setProjects((res.data || []).map(normalizeProject));
+        setTotal(res.total ?? 0);
+      })
+      .catch((err) => {
+        if (!cancelled) setError(err);
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [page, search, status, category]);
+
+  useEffect(() => loadProjects(), [loadProjects]);
+
+  const isFiltering = !!search || category !== "all" || status !== "all";
+  const totalPages = Math.ceil(total / PAGE_SIZE);
 
   function resetFilters() {
-    setSearch("");
+    setSearchInput("");
     setCategory("all");
     setStatus("all");
   }
@@ -97,9 +164,9 @@ export default function ProjectsPage() {
 
           {/* Stats */}
           <div className="grid grid-cols-1 gap-4 border-t border-gold/20 pt-5 sm:grid-cols-3 sm:gap-3 lg:border-l lg:border-t-0 lg:pl-9 lg:pt-0">
-            <Stat value={stats.total} label="Total projects" />
-            <Stat value={stats.published} label="Published" />
-            <Stat value={stats.categories} label="Focus areas" />
+            <Stat value={total} label="Total projects" />
+            <Stat value={publishedTotal} label="Published" />
+            <Stat value={categoriesTotal} label="Focus areas" />
           </div>
         </div>
       </section>
@@ -110,18 +177,49 @@ export default function ProjectsPage() {
       <main className="bg-[#FAF7EF] px-4 py-8 sm:px-8 sm:py-12 lg:py-14">
         <div className="mx-auto max-w-[1180px]">
           <ProjectsToolbar
-            search={search}
-            onSearchChange={setSearch}
+            search={searchInput}
+            onSearchChange={setSearchInput}
             category={category}
             onCategoryChange={setCategory}
             status={status}
             onStatusChange={setStatus}
-            categories={CATEGORIES}
-            resultCount={filtered.length}
+            categories={categories}
+            resultCount={total}
           />
 
-          {/* Empty state */}
-          {filtered.length === 0 ? (
+          {error ? (
+            <div className="flex flex-col items-center rounded-[2px] border border-dashed border-gold-deep/25 bg-white px-5 py-14 text-center text-ink-text/65 sm:py-16">
+              <h3 className="mb-2 font-voice text-xl font-medium text-ink-text sm:text-[23px]">
+                Could not load projects
+              </h3>
+
+              <p className="mb-5 max-w-[44ch] text-sm">
+                The portfolio service did not respond. Check your connection
+                and try again.
+              </p>
+
+              <button
+                type="button"
+                onClick={loadProjects}
+                className="rounded-full border border-gold-deep/25 bg-white px-5 py-2.5 text-[11px] font-bold uppercase tracking-wider text-ink-text transition-colors hover:border-gold hover:text-gold-ink"
+              >
+                Try again
+              </button>
+            </div>
+          ) : loading ? (
+            <div
+              className="grid grid-cols-1 gap-5 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3"
+              aria-busy="true"
+              aria-live="polite"
+            >
+              {Array.from({ length: PAGE_SIZE }).map((_, i) => (
+                <div
+                  key={i}
+                  className="aspect-[16/10] animate-pulse rounded-2xl border border-gold-deep/15 bg-white/70"
+                />
+              ))}
+            </div>
+          ) : projects.length === 0 ? (
             <div className="flex flex-col items-center rounded-[2px] border border-dashed border-gold-deep/25 bg-white px-5 py-14 text-center text-ink-text/65 sm:py-16">
               <FolderIcon className="mb-4 h-11 w-11 text-gold" />
 
@@ -145,15 +243,19 @@ export default function ProjectsPage() {
               )}
             </div>
           ) : (
-            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3">
-              {filtered.map((project) => (
-                <ProjectCard
-                  key={project.id}
-                  project={project}
-                  onView={setViewingId}
-                />
-              ))}
-            </div>
+            <>
+              <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3">
+                {projects.map((project) => (
+                  <ProjectCard
+                    key={project.id}
+                    project={project}
+                    onView={setViewingId}
+                  />
+                ))}
+              </div>
+
+              <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
+            </>
           )}
         </div>
       </main>
@@ -218,9 +320,9 @@ export default function ProjectsPage() {
       {/* ============================================================
           VIEW MODAL
       ============================================================ */}
-      {viewingProject && (
+      {viewingId && (
         <ViewProjectModal
-          project={viewingProject}
+          projectId={viewingId}
           onClose={() => setViewingId(null)}
         />
       )}
