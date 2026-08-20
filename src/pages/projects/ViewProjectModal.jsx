@@ -11,6 +11,7 @@ import Lightbox from "./Lightbox";
 import { Link } from "react-router-dom";
 import { getProjectById } from "../../services/projects.js";
 import { normalizeProject } from "../../utils/normalizeProject.js";
+import { getStatusMeta } from "../../utils/projectStatus.js";
 
 function formatDate(d) {
   if (!d) return "Not specified";
@@ -79,6 +80,7 @@ export default function ViewProjectModal({ projectId, onClose }) {
   const hasPhotos = project?.photos && project.photos.length > 0;
   const hasVideos = project?.videos && project.videos.length > 0;
   const hasYoutubeLinks = project?.youtubeLinks && project.youtubeLinks.length > 0;
+  const statusMeta = project ? getStatusMeta(project.status) : null;
 
   return (
     <div
@@ -154,13 +156,9 @@ export default function ViewProjectModal({ projectId, onClose }) {
 
           {/* Status */}
           <span
-            className={`font-mono absolute left-4 top-[18px] z-[2] rounded-full px-[11px] py-[5px] text-[9px] font-bold uppercase tracking-[0.08em] backdrop-blur-sm ${
-              project.status === "published"
-                ? "bg-seal-raised/90 text-ivory"
-                : "bg-parchment/95 text-ink-text"
-            }`}
+            className={`font-mono absolute left-4 top-[18px] z-[2] rounded-full px-[11px] py-[5px] text-[9px] font-bold uppercase tracking-[0.08em] backdrop-blur-sm ${statusMeta.badgeClass}`}
           >
-            {project.status === "published" ? "Published" : "Draft"}
+            {statusMeta.label}
           </span>
 
           {/* Close */}

@@ -3,6 +3,7 @@ import {
   XIcon,
   ChevronDownIcon,
 } from "../../components/icons/Icons";
+import { PROJECT_STATUSES } from "../../utils/projectStatus.js";
 
 export default function ProjectsToolbar({
   search,
@@ -89,8 +90,12 @@ export default function ProjectsToolbar({
           className="h-12 w-full min-w-[150px] appearance-none rounded-full border border-gold-deep/20 bg-[#FAF7EF] px-4 pr-9 text-[14px] font-semibold text-ink-text outline-none transition-colors focus:border-gold focus:ring-2 focus:ring-gold/15"
         >
           <option value="all">All statuses</option>
-          <option value="published">Published</option>
-          <option value="draft">Draft</option>
+
+          {PROJECT_STATUSES.map((s) => (
+            <option key={s.value} value={s.value}>
+              {s.label}
+            </option>
+          ))}
         </select>
 
         <ChevronDownIcon className="pointer-events-none absolute right-[15px] top-1/2 h-[15px] w-[15px] -translate-y-1/2 text-ink-text/50" />

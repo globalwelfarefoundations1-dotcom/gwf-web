@@ -11,13 +11,9 @@ import { Link } from "react-router-dom";
 const PAGE_SIZE = 6;
 const SEARCH_DEBOUNCE_MS = 400;
 
-/* The three statuses shown in the toolbar map onto the backend's enum;
-   "all" is a client-side-only value that omits the `status` param
-   entirely rather than sending it empty. */
-const STATUS_API_VALUE = {
-  published: "Published",
-  draft: "Draft",
-};
+/* "all" is a client-side-only value that omits the `status` param entirely
+   rather than sending it empty; every other value is one of the four
+   statuses from PROJECT_STATUSES, sent to the API verbatim. */
 
 export default function ProjectsPage() {
   const [searchInput, setSearchInput] = useState("");
@@ -92,7 +88,7 @@ export default function ProjectsPage() {
       offset: (page - 1) * PAGE_SIZE,
       limit: PAGE_SIZE,
       search: search || undefined,
-      status: STATUS_API_VALUE[status],
+      status: status === "all" ? undefined : status,
       categoryId: category === "all" ? undefined : category,
     })
       .then((res) => {

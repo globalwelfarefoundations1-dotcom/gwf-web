@@ -3,6 +3,7 @@ import {
   PlayIcon,
   ArrowRightIcon,
 } from "../../components/icons/Icons";
+import { getStatusMeta } from "../../utils/projectStatus.js";
 
 function formatDate(d) {
   if (!d) return "Not specified";
@@ -21,6 +22,7 @@ function formatDate(d) {
 export default function ProjectCard({ project, onView }) {
   const hasVideo = project.videos && project.videos.length > 0;
   const photoCount = project.photos ? project.photos.length : 0;
+  const statusMeta = getStatusMeta(project.status);
 
   const meta = `${photoCount} ${
     photoCount === 1 ? "photo" : "photos"
@@ -37,13 +39,9 @@ export default function ProjectCard({ project, onView }) {
       >
         {/* Status */}
         <span
-          className={`absolute left-3 top-3 z-10 rounded-full px-[11px] py-[5px] text-[11px] font-bold uppercase tracking-[0.08em] backdrop-blur-sm ${
-            project.status === "published"
-              ? "bg-[#3f7a4fe6] text-ivory"
-              : "bg-[#ffffffe6] text-ink-text"
-          }`}
+          className={`absolute left-3 top-3 z-10 rounded-full px-[11px] py-[5px] text-[11px] font-bold uppercase tracking-[0.08em] backdrop-blur-sm ${statusMeta.badgeClass}`}
         >
-          {project.status === "published" ? "Published" : "Draft"}
+          {statusMeta.label}
         </span>
 
         {/* Media */}

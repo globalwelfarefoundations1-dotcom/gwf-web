@@ -20,7 +20,9 @@ function buildQuery(params = {}) {
    backend treats a present-but-empty `status` differently from an absent
    one. */
 export async function apiGet(path, params) {
-  const response = await fetch(`${API_BASE_URL}${path}${buildQuery(params)}`);
+  const response = await fetch(`${API_BASE_URL}${path}${buildQuery(params)}`, {
+    headers: { Accept: 'application/json' },
+  });
 
   if (!response.ok) {
     throw new Error(`Request to ${path} failed with status ${response.status}`);

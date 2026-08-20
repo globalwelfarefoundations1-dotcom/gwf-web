@@ -23,7 +23,7 @@ export function normalizeProject(raw) {
     client: raw.company || '',
     url: raw.projectUrl || '',
     technologies: Array.isArray(raw.services) ? raw.services : [],
-    status: String(raw.status || '').toLowerCase(),
+    status: raw.status || 'Draft',
     cover: raw.coverImageUrl || '',
     photos: Array.isArray(raw.projectImages) ? raw.projectImages : [],
     videos: Array.isArray(raw.projectVideos) ? raw.projectVideos : [],
